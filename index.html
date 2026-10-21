@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>คำนวณค่าน้ำมัน</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ค่าน้ำมัน">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#e8590c">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAB+klEQVR42u3d0a2CQBBAUSF84re1YYHWht82YAPGIJHdmeGcBt6GXEdZn+ywLvMFPhldAsSBOBAH4kAciANxIA7EgThAHIgDcSAOxIE4EAfiQByIA8SBOBAH4kAciANxIA7EgThAHIiD3025lnt7vCIv73m/VopjyPLYp+BZlExkVMbJV5s7jozXukYfo6ts5e5WqBVH9hdf9vWbHIgDcSAOxEFXU96lB9mlLrMfanIgDsSBOBAH4kAciANxIA4QB+JAHBxicgmO9pevbbt8BW1yJCjD2wriQByIA3EgDhAH4kAckaV+BJTt8xB9xNxINTkQB+JAHIgDdyv7FH72gcmBOBAH4kAcIA7EgTgQB+JAHIgDcSAOxIE4QByIA3EgDsSBOBAH4kAciAPEgTjq6PLDYHFk6qNxIuIwQsSBOM4wDJoND3EgjlqfIdoMD3EgDsSBOBDHCew7VqHNYQziQByFhkezM1zEgTiqDI+WRz85qSlWH1+2PtufCCaOBIn0OihOHHXub33mQByIA3EgDsSBOBAHiANxIA7EgTgQB+JAHIgDcQQU5B+iTrv+YV3mLn+4yxPQNORtBXEgDsSBOBAH4kAciAPEwSbdts8xORAH4kAcIA7EgTgQB+JAHIgDcSAOxIE4QByIA3EgDsSBOBAH4kAciAPEwTZv6uFMyR9vB3gAAAAASUVORK5CYII=">
+<style>
+:root{--bg:#f4f6f9;--card:#fff;--tx:#1b2430;--mut:#6b7684;--line:#dde3ea;--pri:#e8590c;--pri2:#fff;--ok:#0b7a43;--res:#fff4ec;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14181d;--card:#1f252c;--tx:#eef1f5;--mut:#9aa5b1;--line:#333d48;--pri:#ff8a3d;--pri2:#1b1209;--ok:#4cd38a;--res:#2a2018}}
+:root[data-theme="dark"]{--bg:#14181d;--card:#1f252c;--tx:#eef1f5;--mut:#9aa5b1;--line:#333d48;--pri:#ff8a3d;--pri2:#1b1209;--ok:#4cd38a;--res:#2a2018}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:"Noto Sans Thai",system-ui,-apple-system,"Sarabun",sans-serif;font-size:17px}
+.w{max-width:520px;margin:0 auto;padding:16px}
+h1{font-size:22px;margin:8px 0 14px}
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tabs button{flex:1;padding:12px 6px;border:1px solid var(--line);background:var(--card);color:var(--mut);border-radius:12px;font:inherit;font-weight:600;font-size:15px}
+.tabs button.on{background:var(--pri);color:var(--pri2);border-color:var(--pri)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+label{display:block;font-size:14px;color:var(--mut);margin:12px 0 6px}
+label:first-child{margin-top:0}
+.f{display:flex;align-items:center;border:1px solid var(--line);border-radius:12px;background:var(--bg);padding:0 12px}
+.f input{flex:1;min-width:0;border:0;background:transparent;color:var(--tx);font:inherit;font-size:20px;padding:12px 0;outline:none}
+.f span{color:var(--mut);font-size:14px;margin-left:8px;white-space:nowrap}
+.f:focus-within{border-color:var(--pri)}
+.chk{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:15px;color:var(--tx)}
+.chk input{width:22px;height:22px;accent-color:var(--pri)}
+.res{background:var(--res);border-radius:14px;padding:14px;margin-top:16px;text-align:center}
+.res small{display:block;color:var(--mut);font-size:14px}
+.big{font-size:34px;font-weight:700;color:var(--pri);line-height:1.3}
+.row{display:flex;gap:10px;margin-top:10px}
+.row>div{flex:1;background:var(--bg);border-radius:12px;padding:10px;text-align:center}
+.row b{display:block;font-size:20px}
+.row small{color:var(--mut);font-size:13px}
+.sm{font-size:13px;color:var(--mut);margin-top:12px;line-height:1.6}
+.clr{width:100%;margin-top:6px;padding:12px;border:1px solid var(--line);background:transparent;color:var(--mut);border-radius:12px;font:inherit;font-size:15px}
+.hide{display:none}
+</style>
+</head>
+<body>
+<div class="w">
+<h1>⛽ คำนวณค่าน้ำมัน</h1>
+<div class="tabs">
+<button id="t1" class="on" onclick="tab(1)">คำนวณค่าน้ำมัน</button>
+<button id="t2" onclick="tab(2)">หาอัตราสิ้นเปลือง</button>
+</div>
+
+<div id="p1" class="card">
+<label>ระยะทาง</label>
+<div class="f"><input id="d1" type="number" inputmode="decimal" placeholder="300"><span>กม.</span></div>
+<label>อัตราสิ้นเปลืองของรถ</label>
+<div class="f"><input id="k1" type="number" inputmode="decimal" placeholder="15"><span>กม./ลิตร</span></div>
+<label>ราคาน้ำมัน</label>
+<div class="f"><input id="p" type="number" inputmode="decimal" placeholder="35"><span>บาท/ลิตร</span></div>
+<label class="chk"><input id="rt" type="checkbox"> ไป-กลับ (คูณระยะทาง 2)</label>
+<div class="res">
+<small>ค่าน้ำมันรวม</small>
+<div class="big" id="cost">0 บาท</div>
+</div>
+<div class="row">
+<div><b id="lit">0</b><small>ลิตรที่ใช้</small></div>
+<div><b id="dist">0</b><small>กม. รวม</small></div>
+<div><b id="perkm">0</b><small>บาท/กม.</small></div>
+</div>
+<p class="sm">สูตร: ลิตร = ระยะทาง ÷ อัตราสิ้นเปลือง<br>ค่าน้ำมัน = ลิตร × ราคาต่อลิตร</p>
+</div>
+
+<div id="p2" class="card hide">
+<p class="sm" style="margin-top:0">เติมน้ำมันเต็มถัง จดเลขไมล์ วิ่งใช้งานปกติ แล้วเติมเต็มถังอีกครั้ง กรอกค่าด้านล่าง</p>
+<label>ระยะทางที่วิ่งได้</label>
+<div class="f"><input id="d2" type="number" inputmode="decimal" placeholder="600"><span>กม.</span></div>
+<label>จำนวนลิตรที่เติมกลับ</label>
+<div class="f"><input id="l2" type="number" inputmode="decimal" placeholder="40"><span>ลิตร</span></div>
+<div class="res">
+<small>อัตราสิ้นเปลืองของรถ</small>
+<div class="big" id="kpl">0 กม./ลิตร</div>
+</div>
+<button class="clr" id="use" onclick="useRate()">นำค่านี้ไปคำนวณค่าน้ำมัน →</button>
+</div>
+
+<button class="clr" onclick="clr()">ล้างค่าทั้งหมด</button>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const ids=["d1","k1","p","d2","l2"];
+const num=id=>{const v=parseFloat($(id).value);return isFinite(v)&&v>0?v:0};
+const fmt=(n,d=2)=>n.toLocaleString("th-TH",{minimumFractionDigits:0,maximumFractionDigits:d});
+function save(){try{const o={rt:$("rt").checked};ids.forEach(i=>o[i]=$(i).value);localStorage.setItem("fuelcalc",JSON.stringify(o))}catch(e){}}
+function load(){try{const o=JSON.parse(localStorage.getItem("fuelcalc")||"null");if(o){ids.forEach(i=>{if(o[i]!=null)$(i).value=o[i]});$("rt").checked=!!o.rt}}catch(e){}}
+function calc(){
+ const km=num("d1")*($("rt").checked?2:1),r=num("k1"),pr=num("p");
+ const l=r?km/r:0,c=l*pr;
+ $("lit").textContent=fmt(l);$("dist").textContent=fmt(km,1);
+ $("cost").textContent=fmt(c)+" บาท";
+ $("perkm").textContent=km?fmt(c/km):"0";
+ const d=num("d2"),li=num("l2");
+ $("kpl").textContent=(li?fmt(d/li):"0")+" กม./ลิตร";
+ save();
+}
+function tab(n){
+ $("p1").classList.toggle("hide",n!==1);$("p2").classList.toggle("hide",n!==2);
+ $("t1").classList.toggle("on",n===1);$("t2").classList.toggle("on",n===2);
+}
+function useRate(){
+ const d=num("d2"),li=num("l2");
+ if(d&&li){$("k1").value=Math.round(d/li*100)/100;tab(1);calc()}
+}
+function clr(){ids.forEach(i=>$(i).value="");$("rt").checked=false;calc()}
+ids.forEach(i=>$(i).addEventListener("input",calc));
+$("rt").addEventListener("change",calc);
+load();calc();
+</script>
+</body>
+</html>
