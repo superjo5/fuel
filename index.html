@@ -42,6 +42,7 @@ label:first-child{margin-top:0}
 .sm{font-size:13px;color:var(--mut);margin-top:12px;line-height:1.6}
 .clr{width:100%;margin-top:6px;padding:12px;border:1px solid var(--line);background:transparent;color:var(--mut);border-radius:12px;font:inherit;font-size:15px}
 .hide{display:none}
+.tb{width:100%;border-collapse:collapse;margin-top:12px;font-size:15px}.tb td{padding:8px 4px;border-bottom:1px solid var(--line)}.tb td:last-child{text-align:right;font-weight:600}.hl{color:var(--ok);font-weight:600}.g3{margin-top:12px;line-height:1.7}
 </style>
 </head>
 <body>
@@ -49,7 +50,8 @@ label:first-child{margin-top:0}
 <h1>⛽ คำนวณค่าน้ำมัน</h1>
 <div class="tabs">
 <button id="t1" class="on" onclick="tab(1)">คำนวณค่าน้ำมัน</button>
-<button id="t2" onclick="tab(2)">หาอัตราสิ้นเปลือง</button>
+<button id="t2" onclick="tab(2)">หา กม./ลิตร</button>
+<button id="t3" onclick="tab(3)">เติมให้เต็มลิตร</button>
 </div>
 
 <div id="p1" class="card">
@@ -85,17 +87,43 @@ label:first-child{margin-top:0}
 <button class="clr" id="use" onclick="useRate()">นำค่านี้ไปคำนวณค่าน้ำมัน →</button>
 </div>
 
+<div id='pn3' class='card hide'>
+<p class='sm' style='margin-top:0'>ใส่ราคาน้ำมันกับจำนวนเงิน จะบอกว่าต้องเติมเพิ่มกี่บาทให้ครบลิตรเต็ม (1 ลิตร = 1 คะแนน)</p>
+<label>ราคาน้ำมัน</label>
+<div class='f'><input id='p3' type='number' inputmode='decimal' placeholder='42.04'><span>บาท/ลิตร</span></div>
+<label>จำนวนเงินที่จะเติม</label>
+<div class='f'><input id='m3' type='number' inputmode='decimal' placeholder='1000'><span>บาท</span></div>
+<div class='res' id='o3'></div>
+<label style='margin-top:18px'>หรือ อยากได้กี่ลิตร</label>
+<div class='f'><input id='tg' type='number' inputmode='decimal' placeholder='20'><span>ลิตร</span></div>
+<div class='g3' id='g3'></div>
+<table class='tb' id='tb3'></table>
+</div>
+
 <button class="clr" onclick="clr()">ล้างค่าทั้งหมด</button>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const ids=["d1","k1","p","d2","l2"];
+const ids=["d1","k1","p","d2","l2","p3","m3","tg"];
 const num=id=>{const v=parseFloat($(id).value);return isFinite(v)&&v>0?v:0};
 const fmt=(n,d=2)=>n.toLocaleString("th-TH",{minimumFractionDigits:0,maximumFractionDigits:d});
 function save(){try{const o={rt:$("rt").checked};ids.forEach(i=>o[i]=$(i).value);localStorage.setItem("fuelcalc",JSON.stringify(o))}catch(e){}}
 function load(){try{const o=JSON.parse(localStorage.getItem("fuelcalc")||"null");if(o){ids.forEach(i=>{if(o[i]!=null)$(i).value=o[i]});$("rt").checked=!!o.rt}}catch(e){}}
+function calc3(){
+ const pr=num('p3'),m=num('m3'),tg=num('tg'),o=$('o3'),g=$('g3'),tb=$('tb3');
+ let base=0;
+ if(pr&&m){
+  const x=m/pr,r2=Math.floor(x*100+1e-6)/100,ex=Math.abs(x-Math.round(x))<1e-6,full=ex?Math.round(x):Math.floor(x),nx=ex?full:full+1;
+  const need=Math.ceil(nx*pr*100-1e-6)/100,extra=Math.max(0,need-m),rb=Math.ceil(need-1e-9);
+  base=full||1;
+  o.innerHTML=`<small>เติม ${fmt(m)} บาท ได้</small><div class='big'>${fmt(r2)} ลิตร</div><small>นับคะแนนได้ ${full} คะแนน</small>`+(ex?`<div class='hl' style='margin-top:8px'>ครบลิตรเต็มพอดีแล้ว 🎉</div>`:`<div style='margin-top:10px;line-height:1.7'>เติมเพิ่มอีก <b class='hl'>${fmt(extra)} บาท</b> (รวม ${fmt(need)} บาท)<br>จะได้ <b>${nx} ลิตร = ${nx} คะแนน</b><br><small>หรือเติมเลขกลม ${fmt(rb)} บาท จะได้ ${fmt(rb/pr)} ลิตร</small></div>`);
+ }else o.innerHTML=`<small>กรอกราคาน้ำมันและจำนวนเงิน</small>`;
+ if(pr&&tg){const c=tg*pr,rb=Math.ceil(c-1e-9);g.innerHTML=`อยากได้ <b>${fmt(tg)} ลิตร</b> ต้องใช้ <b class='hl'>${fmt(c)} บาท</b><br><small>เติมเลขกลม ${fmt(rb)} บาท ได้ ${fmt(rb/pr)} ลิตร</small>`;if(!base)base=Math.max(1,Math.round(tg))}else g.innerHTML='';
+ if(pr&&base){let rows='';for(let n=Math.max(1,base-1);n<base+4;n++)rows+=`<tr><td>${n} ลิตร</td><td>${fmt(n*pr)} บาท</td></tr>`;tb.innerHTML=rows}else tb.innerHTML='';
+}
 function calc(){
+ if(document.activeElement===$('p3'))$('p').value=$('p3').value;else if(document.activeElement===$('p'))$('p3').value=$('p').value;
  const km=num("d1")*($("rt").checked?2:1),r=num("k1"),pr=num("p");
  const l=r?km/r:0,c=l*pr;
  $("lit").textContent=fmt(l);$("dist").textContent=fmt(km,1);
@@ -103,11 +131,12 @@ function calc(){
  $("perkm").textContent=km?fmt(c/km):"0";
  const d=num("d2"),li=num("l2");
  $("kpl").textContent=(li?fmt(d/li):"0")+" กม./ลิตร";
+ calc3();
  save();
 }
 function tab(n){
- $("p1").classList.toggle("hide",n!==1);$("p2").classList.toggle("hide",n!==2);
- $("t1").classList.toggle("on",n===1);$("t2").classList.toggle("on",n===2);
+ $("p1").classList.toggle("hide",n!==1);$("p2").classList.toggle("hide",n!==2);$("pn3").classList.toggle("hide",n!==3);
+ $("t1").classList.toggle("on",n===1);$("t2").classList.toggle("on",n===2);$("t3").classList.toggle("on",n===3);
 }
 function useRate(){
  const d=num("d2"),li=num("l2");
